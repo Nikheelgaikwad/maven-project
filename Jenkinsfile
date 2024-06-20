@@ -1,55 +1,52 @@
 pipeline {
-    agent any
-
+    agent any 
+   
+    parameters {
+        choice(name: 'BRANCH_NAME', choices: ['develop', 'bugfix', 'master'], description: 'Branch name to deploy from')
+        choice(name: 'DEPLOY_ENV', choices: ['staging', 'production'], description: 'Deployment environment')
+    }   
+   
     environment {
-        // Define any environment variables here
-        BUILD_TOOL = 'maven' // Since we're using a Maven-based project
-        DEPLOY_ENV = 'production'
-    }
-
+        // define env varibale 
+        BUILD_TOOL = 'MAVEN'
+        DEPLOY_ENV = 'PROD'
+        
     stages {
-        stage('Checkout') {
+        stage('checkout') {
             steps {
-                echo 'Checking out code...'
+                echo 'checkout code...'
                 checkout scm
-            }
-        }
-
+            }    
+        }        
+        
         stage('Build') {
             steps {
-                script {
-                    echo 'Building the project with Maven...'
-                    sh 'mvn clean install'
-                }
-            }
-        }
-
-        stage('Test') {
+                 script {
+                     echo 'building maven project'
+                     sh 'mvn clean install'
+                 }           
+            } 
+        }    
+        
+        stage('test') {
             steps {
-                script {
-                    echo 'Running tests with Maven...'
-                    sh 'mvn test'
-                }
-            }
-        }
-
-        stage('Package') {
-            steps {
-                script {
-                    echo 'Packaging the application with Maven...'
-                    sh 'mvn package'
-                }
-            }
-        }
-
+                 script {
+                     echo 'running test with maven'
+                     sh 'mvn test'
+                 }           
+            } 
+        }  
+        
         stage('Deploy') {
             when {
-                branch 'main'
+                expression {
+                    return ['develop', 'bugfix', 'master'].contains(params.BRANCH_NAME)
+                }
             }
             steps {
-                echo 'Deploying application...'
+                echo "Deploying application to ${params.DEPLOY_ENV} environment from ${params.BRANCH_NAME} branch..."
                 script {
-                    if (env.DEPLOY_ENV == 'production') {
+                    if (params.DEPLOY_ENV == 'production') {
                         echo 'Deploying to production...'
                         // Using SCP to deploy to a production server
                         sh '''
@@ -68,19 +65,6 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
-            echo 'Cleaning up...'
-            cleanWs()
-        }
-        success {
-            echo 'Build succeeded!'
-            // Optionally, notify team via email or Slack
-        }
-        failure {
-            echo 'Build failed!'
-            // Optionally, notify team via email or Slack
-        }
-    }
 }
+
+                   
