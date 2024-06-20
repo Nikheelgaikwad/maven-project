@@ -10,7 +10,7 @@ pipeline {
         // define env varibale 
         BUILD_TOOL = 'MAVEN'
         DEPLOY_ENV = 'PROD'
-        
+    }    
     stages {
         stage('checkout') {
             steps {
