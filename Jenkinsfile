@@ -10,7 +10,10 @@ pipeline {
         // define env varibale 
         BUILD_TOOL = 'MAVEN'
         DEPLOY_ENV = 'PROD'
-    }    
+    }
+    tools {
+        maven 'Maven 3.9.8' // Specify the name of the Maven installation configured in Jenkins
+    }
     stages {
         stage('checkout') {
             steps {
